@@ -1,14 +1,13 @@
-package io.prometheus.cloudwatch;
+package io.prometheus.cloudwatch.servlet;
 
-import javax.servlet.ServletException;
+import java.io.IOException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 public class HomePageServlet extends HttpServlet {
 
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/html");
         resp.getWriter().print("<html>\n"
                 + "<head><title>CloudWatch Exporter</title></head>\n"

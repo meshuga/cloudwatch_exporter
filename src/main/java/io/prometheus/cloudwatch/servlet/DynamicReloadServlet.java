@@ -1,16 +1,17 @@
-package io.prometheus.cloudwatch;
+package io.prometheus.cloudwatch.servlet;
 
+import io.prometheus.cloudwatch.CloudWatchCollector;
+
+import java.io.IOException;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class DynamicReloadServlet extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(CloudWatchCollector.class.getName());
-    private static CloudWatchCollector collector;
+    private CloudWatchCollector collector;
 
     public DynamicReloadServlet(CloudWatchCollector collector) {
         this.collector = collector;
