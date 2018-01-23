@@ -1,4 +1,4 @@
-FROM java
+FROM openjdk:8-jre
 MAINTAINER Prometheus Team <prometheus-developers@googlegroups.com>
 EXPOSE 9106
 
@@ -12,4 +12,4 @@ WORKDIR /
 RUN mkdir /config
 
 ONBUILD ADD config.yml /config/
-ENTRYPOINT [ "java", "-XX:MaxDirectMemorySize=55m", "-jar", "/cloudwatch_exporter.jar", "9106", "/config/config.yml" ]
+ENTRYPOINT [ "java", "-XX:+UnlockExperimentalVMOptions", "-XX:+UseCGroupMemoryLimitForHeap", "-jar", "/cloudwatch_exporter.jar", "9106", "/config/config.yml" ]

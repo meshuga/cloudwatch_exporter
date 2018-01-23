@@ -16,6 +16,7 @@ import io.prometheus.cloudwatch.ActiveConfig;
 import io.prometheus.cloudwatch.MetricRule;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -43,16 +44,14 @@ public class CloudWatchScraper {
     }
 
     private CompletableFuture<List<List<Dimension>>> getDimensions(MetricRule rule, AmazonCloudWatchAsync client) {
-        List<List<Dimension>> dimensions = new ArrayList<List<Dimension>>();
         if (rule.getAwsDimensions() == null) {
-            dimensions.add(new ArrayList<>());
-            return CompletableFuture.completedFuture(dimensions);
+            return CompletableFuture.completedFuture(Collections.singletonList(Collections.emptyList()));
         }
 
         ListMetricsRequest request = new ListMetricsRequest();
         request.setNamespace(rule.getAwsNamespace());
         request.setMetricName(rule.getAwsMetricName());
-        List<DimensionFilter> dimensionFilters = new ArrayList<DimensionFilter>();
+        List<DimensionFilter> dimensionFilters = new ArrayList<>(rule.getAwsDimensions().size());
         for (String dimension : rule.getAwsDimensions()) {
             dimensionFilters.add(new DimensionFilter().withName(dimension));
         }
@@ -177,7 +176,7 @@ public class CloudWatchScraper {
             final CompletableFuture[] rulesStream) {
         return CompletableFuture.allOf(rulesStream)
                 .thenApply(v -> {
-                    List<Collector.MetricFamilySamples> mfs = new ArrayList<>();
+                    List<Collector.MetricFamilySamples> mfs = new ArrayList<>(rulesStream.length);
                     Stream.of(rulesStream)
                             .map(future -> (List<Collector.MetricFamilySamples>) future.join())
                             .forEach(mfs::addAll);
@@ -215,8 +214,8 @@ public class CloudWatchScraper {
                                             return Optional.<Samples>empty();
                                         }
                                         unit.set(dp.getUnit());
-                                        List<String> labelNames = new ArrayList<>();
-                                        List<String> labelValues = new ArrayList<>();
+                                        List<String> labelNames = new ArrayList<>(dimensions.size());
+                                        List<String> labelValues = new ArrayList<>(dimensions.size());
                                         labelNames.add("job");
                                         labelValues.add(jobName);
                                         labelNames.add("instance");

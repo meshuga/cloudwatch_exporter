@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +95,7 @@ public class CloudWatchCollector extends Collector {
             mfs = scraper.scrape((ActiveConfig) activeConfig.clone())
                     .get();
         } catch (Exception e) {
-            mfs = new ArrayList<>();
+            mfs = Collections.emptyList();
             error = 1;
             LOGGER.log(Level.WARNING, "CloudWatch scrape failed", e);
         }
@@ -107,15 +108,19 @@ public class CloudWatchCollector extends Collector {
                                                         final List<MetricFamilySamples> mfs) {
         List<MetricFamilySamples> fullMfs = new ArrayList<>(mfs);
 
-        List<MetricFamilySamples.Sample> samples = new ArrayList<>();
-        samples.add(new MetricFamilySamples.Sample(
-                "cloudwatch_exporter_scrape_duration_seconds", new ArrayList<>(), new ArrayList<>(), (System.nanoTime() - start) / 1.0E9));
-        fullMfs.add(new MetricFamilySamples("cloudwatch_exporter_scrape_duration_seconds", Type.GAUGE, "Time this CloudWatch scrape took, in seconds.", samples));
+        fullMfs.add(new MetricFamilySamples("cloudwatch_exporter_scrape_duration_seconds", Type.GAUGE,
+                "Time this CloudWatch scrape took, in seconds.", Collections.singletonList(
+                new MetricFamilySamples.Sample(
+                        "cloudwatch_exporter_scrape_duration_seconds", Collections.emptyList(),
+                        Collections.emptyList(), (System.nanoTime() - start) / 1.0E9)
+        )));
 
-        samples = new ArrayList<>();
-        samples.add(new MetricFamilySamples.Sample(
-                "cloudwatch_exporter_scrape_error", new ArrayList<>(), new ArrayList<>(), error));
-        fullMfs.add(new MetricFamilySamples("cloudwatch_exporter_scrape_error", Type.GAUGE, "Non-zero if this scrape failed.", samples));
+        fullMfs.add(new MetricFamilySamples("cloudwatch_exporter_scrape_error", Type.GAUGE,
+                "Non-zero if this scrape failed.", Collections.singletonList(
+                new MetricFamilySamples.Sample(
+                        "cloudwatch_exporter_scrape_error", Collections.emptyList(),
+                        Collections.emptyList(), error)
+        )));
 
         return fullMfs;
     }
