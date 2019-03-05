@@ -119,4 +119,5 @@ public class MetricRule {
     public boolean isCloudwatchTimestamp() {
         return cloudwatchTimestamp;
     }
+
 }

@@ -258,6 +258,7 @@ public class CloudWatchScraper {
                 future.complete(sendMessageResult);
             }
         });
+
         cloudwatchRequests.labels("getMetricStatistics", request.getNamespace()).inc();
         return future;
     }

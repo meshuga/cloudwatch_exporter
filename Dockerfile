@@ -16,3 +16,4 @@ ONBUILD ADD config.yml /config/
 COPY --from=builder /cloudwatch_exporter.jar /cloudwatch_exporter.jar
 ENTRYPOINT [ "java", "-jar", "/cloudwatch_exporter.jar", "9106"]
 CMD ["/config/config.yml"]
+
