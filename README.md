@@ -1,15 +1,24 @@
 CloudWatch Exporter
 =====
 
+This branch has been forked of https://github.com/meshuga/cloudwatch_exporter (async_client branch) and updated with latest from https://github.com/prometheus/cloudwatch_exporter - 03/05/2019
+
 An exporter for [Amazon CloudWatch](http://aws.amazon.com/cloudwatch/), for Prometheus.
 
-## Building and running
+## Building and running with maven
 
 `mvn package` to build.
 
 `java -jar target/cloudwatch_exporter-*-SNAPSHOT-jar-with-dependencies.jar 9106 example.yml` to run.
 
 The most recent pre-built JAR can be found at http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22cloudwatch_exporter%22
+
+## Building and running with Gradle
+
+`gradle fullJar` to build.
+
+`java -jar build/libs/cloudwatch_exporter-jar-with-dependencies-*.jar 9106 example.yml` to run.
+
 
 ## Credentials and permissions
 

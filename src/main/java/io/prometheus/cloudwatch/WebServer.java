@@ -1,6 +1,10 @@
 package io.prometheus.cloudwatch;
 
 import io.prometheus.client.exporter.MetricsServlet;
+import io.prometheus.cloudwatch.servlet.DynamicReloadServlet;
+import io.prometheus.cloudwatch.servlet.HealthServlet;
+import io.prometheus.cloudwatch.servlet.HomePageServlet;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -8,8 +12,6 @@ import java.util.logging.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 public class WebServer {
 
