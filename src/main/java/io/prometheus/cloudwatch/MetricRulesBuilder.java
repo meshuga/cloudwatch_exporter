@@ -83,6 +83,7 @@ public class MetricRulesBuilder {
             } else {
                 rule.cloudwatchTimestamp = defaultCloudwatchTimestamp;
             }
+
         }
 
         return rules;
