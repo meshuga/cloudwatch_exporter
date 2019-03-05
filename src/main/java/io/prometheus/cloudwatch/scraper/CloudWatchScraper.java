@@ -217,7 +217,6 @@ public class CloudWatchScraper {
                                         unit.set(dp.getUnit());
                                         List<String> labelNames = new ArrayList<>(dimensions.size());
                                         List<String> labelValues = new ArrayList<>(dimensions.size());
-                                        result.getDatapoints().forEach(dp1 -> {System.out.println(dp + " - " + dimensions);});
                                         labelNames.add("job");
                                         labelValues.add(jobName);
                                         labelNames.add("instance");

@@ -56,10 +56,11 @@ public class Samples {
                     baseName + "_average", labelNames, labelValues, dp.getAverage(), timestamp));
         }
         if (dp.getExtendedStatistics() != null) {
+        	final Long tmstmp = timestamp;
             dp.getExtendedStatistics().forEach((key, value) -> extendedSamples
                 .computeIfAbsent(key, k -> new ArrayList<>())
                 .add(new Collector.MetricFamilySamples.Sample(
-                        baseName + "_" + Common.safeName(Common.toSnakeCase(key)), labelNames, labelValues, value)));
+                        baseName + "_" + Common.safeName(Common.toSnakeCase(key)), labelNames, labelValues, value, tmstmp)));
         }
     }
 
