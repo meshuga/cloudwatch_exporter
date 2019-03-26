@@ -5,10 +5,13 @@ import io.prometheus.client.Collector;
 import io.prometheus.cloudwatch.MetricRule;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Samples {
     private String baseName;
@@ -107,6 +110,8 @@ public class Samples {
         minimumSamples.addAll(samples.minimumSamples);
         maximumSamples.addAll(samples.maximumSamples);
         averageSamples.addAll(samples.averageSamples);
-        extendedSamples.putAll(samples.extendedSamples);
+        samples.extendedSamples.forEach((key, value) -> extendedSamples.merge(key, value,
+				(list1, list2) -> Stream.of(list1, list2).flatMap(Collection::stream).collect(Collectors.toList())));
+       
     }
 }
