@@ -327,17 +327,23 @@ public class CloudWatchScraperTest {
                 .get();
 
         // THEN
-        assertEquals("aws_elb_latency_p95", result.get(0).name);
-        assertEquals(1, result.get(0).samples.size());
-        assertEquals(1.0, result.get(0).samples.get(0).value, DELTA);
-        assertEquals(Arrays.asList("job", "instance"), result.get(0).samples.get(0).labelNames);
-        assertEquals(Arrays.asList("aws_elb", ""), result.get(0).samples.get(0).labelValues);
+        result.forEach(t -> {
+        	if ("aws_elb_latency_p95".equalsIgnoreCase(t.name)) {
+        		assertEquals("aws_elb_latency_p95", t.name);
+        		assertEquals(1, t.samples.size());
+        		assertEquals(1.0, t.samples.get(0).value, DELTA);
+        		assertEquals(Arrays.asList("job", "instance"), t.samples.get(0).labelNames);
+        		assertEquals(Arrays.asList("aws_elb", ""), t.samples.get(0).labelValues);
+            } else {
+            	assertEquals("aws_elb_latency_p99_99", t.name);
+            	assertEquals(1, t.samples.size());
+            	assertEquals(2.0, t.samples.get(0).value, DELTA);
+            	assertEquals(Arrays.asList("job", "instance"), t.samples.get(0).labelNames);
+            	assertEquals(Arrays.asList("aws_elb", ""), t.samples.get(0).labelValues);
+            } 
 
-        assertEquals("aws_elb_latency_p99_99", result.get(1).name);
-        assertEquals(1, result.get(1).samples.size());
-        assertEquals(2.0, result.get(1).samples.get(0).value, DELTA);
-        assertEquals(Arrays.asList("job", "instance"), result.get(1).samples.get(0).labelNames);
-        assertEquals(Arrays.asList("aws_elb", ""), result.get(1).samples.get(0).labelValues);
+        });
+        
     }
 
     @Test
