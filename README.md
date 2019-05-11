@@ -1,15 +1,24 @@
 CloudWatch Exporter
 =====
 
+This branch has been forked of https://github.com/meshuga/cloudwatch_exporter (async_client branch) and updated with latest from https://github.com/prometheus/cloudwatch_exporter - 03/05/2019
+
 An exporter for [Amazon CloudWatch](http://aws.amazon.com/cloudwatch/), for Prometheus.
 
-## Building and running
+## Building and running with maven
 
 `mvn package` to build.
 
 `java -jar target/cloudwatch_exporter-*-SNAPSHOT-jar-with-dependencies.jar 9106 example.yml` to run.
 
 The most recent pre-built JAR can be found at http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22cloudwatch_exporter%22
+
+## Building and running with Gradle
+
+`gradle fullJar` to build.
+
+`java -jar build/libs/cloudwatch_exporter-jar-with-dependencies-*.jar 9106 example.yml` to run.
+
 
 ## Credentials and permissions
 
@@ -49,6 +58,7 @@ aws_extended_statistics | Optional. A list of extended statistics to retrieve. E
 delay_seconds | Optional. The newest data to request. Used to avoid collecting data that has not fully converged. Defaults to 600s. Can be set globally and per metric.
 range_seconds | Optional. How far back to request data for. Useful for cases such as Billing metrics that are only set every few hours. Defaults to 600s. Can be set globally and per metric.
 period_seconds | Optional. [Period](http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_concepts.html#CloudWatchPeriods) to request the metric for. Only the most recent data point is used. Defaults to 60s. Can be set globally and per metric.
+set_timestamp | Optional. Boolean for whether to set the Prometheus metric timestamp as the original Cloudwatch timestamp. For some metrics which are updated very infrequently (such as S3/BucketSize), Prometheus may refuse to scrape them if this is set to true (see #100). Defaults to true. Can be set globally and per metric.
 
 The above config will export time series such as 
 ```
@@ -60,15 +70,27 @@ aws_elb_request_count_sum{job="aws_elb",load_balancer_name="myotherlb",availabil
 
 All metrics are exported as gauges.
 
-Timestamps from CloudWatch are not passed to Prometheus, pending resolution of
-[#398](https://github.com/prometheus/prometheus/issues/398). CloudWatch has
-been observed to sometimes take minutes for reported values to converge. The
-default `delay_seconds` will result in data that is at least 10 minutes old
-being requested to mitigate this.
-
 In addition `cloudwatch_exporter_scrape_error` will be non-zero if an error
 occurred during the scrape, and `cloudwatch_exporter_scrape_duration_seconds`
 contains the duration of that scrape.
+
+### Timestamps
+
+CloudWatch has been observed to sometimes take minutes for reported values to converge. The
+default `delay_seconds` will result in data that is at least 10 minutes old
+being requested to mitigate this. The samples exposed will have the timestamps of the
+data from CloudWatch, so usual staleness semantics will not apply and values will persist
+for 5m for instant vectors.
+
+In practice this means that if you evaluate an instant vector at the current
+time, you will not see data from CloudWatch. An expression such as
+`aws_elb_request_count_sum offset 10m` will allow you to access the data, and
+should be used in recording rules and alerts.
+
+For certain metrics which update relatively rarely, such as from S3,
+`set_timestamp` should be configured to false so that they are not exposed with
+a timestamp. This is as the true timestamp from CloudWatch could be so old that
+Prometheus would reject the sample.
 
 ### Special handling for certain DynamoDB metrics
 
@@ -99,7 +121,7 @@ DynamoDB metrics not listed above.
 There are two ways to reload configuration:
 
 1. Send a SIGHUP signal to the pid: `kill -HUP 1234`
-2. POST to the `reload` endpoint: `curl -X localhost:9106/-/reload`
+2. POST to the `reload` endpoint: `curl -X POST localhost:9106/-/reload`
 
 If an error occurs during the reload, check the exporter's log output.
 
@@ -113,20 +135,26 @@ to do API requests to determine what metrics to request. This should be
 negligible compared to the requests for the metrics themselves.
 
 If you have 100 API requests every minute, with the price of USD$10 per million
-requests (as of Jan 2015), that is around $45 per month. The
+requests (as of Aug 2018), that is around $45 per month. The
 `cloudwatch_requests_total` counter tracks how many requests are being made.
 
 ## Docker Image
 
 To run the CloudWatch exporter on Docker, you can use the [prom/cloudwatch-exporter](https://hub.docker.com/r/prom/cloudwatch-exporter/)
 image. It exposes port 9106 and expects the config in `/config/config.yml`. To
-configure it, you can either bind-mount a config from your host:
+configure it, you can bind-mount a config from your host:
 
 ```
 $ docker run -p 9106 -v /path/on/host/config.yml:/config/config.yml prom/cloudwatch-exporter
 ```
 
-Or you create a config file named /config/config.yml along with following
+Specify the config as the CMD:
+
+```
+$ docker run -p 9106 -v /path/on/host/us-west-1.yml:/config/us-west-1.yml prom/cloudwatch-export /config/us-west-1.yml
+```
+
+Or create a config file named /config/config.yml along with following
 Dockerfile in the same directory and build it with `docker build`:
 
 ```

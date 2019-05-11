@@ -5,9 +5,13 @@ import io.prometheus.client.Collector;
 import io.prometheus.cloudwatch.MetricRule;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Samples {
     private String baseName;
@@ -25,34 +29,41 @@ public class Samples {
     public Samples(final String baseName,
                    final Datapoint dp,
                    final List<String> labelNames,
-                   final List<String> labelValues) {
+                   final List<String> labelValues,
+                   final MetricRule rule) {
         this.baseName = baseName;
+
+        Long timestamp = null;
+        if (rule.isCloudwatchTimestamp()) {
+          timestamp = dp.getTimestamp().getTime();
+        }
 
         if (dp.getSum() != null) {
             sumSamples.add(new Collector.MetricFamilySamples.Sample(
-                    baseName + "_sum", labelNames, labelValues, dp.getSum()));
+                    baseName + "_sum", labelNames, labelValues, dp.getSum(), timestamp));
         }
         if (dp.getSampleCount() != null) {
             sampleCountSamples.add(new Collector.MetricFamilySamples.Sample(
-                    baseName + "_sample_count", labelNames, labelValues, dp.getSampleCount()));
+                    baseName + "_sample_count", labelNames, labelValues, dp.getSampleCount(), timestamp));
         }
         if (dp.getMinimum() != null) {
             minimumSamples.add(new Collector.MetricFamilySamples.Sample(
-                    baseName + "_minimum", labelNames, labelValues, dp.getMinimum()));
+                    baseName + "_minimum", labelNames, labelValues, dp.getMinimum(), timestamp));
         }
         if (dp.getMaximum() != null) {
             maximumSamples.add(new Collector.MetricFamilySamples.Sample(
-                    baseName + "_maximum", labelNames, labelValues, dp.getMaximum()));
+                    baseName + "_maximum", labelNames, labelValues, dp.getMaximum(), timestamp));
         }
         if (dp.getAverage() != null) {
             averageSamples.add(new Collector.MetricFamilySamples.Sample(
-                    baseName + "_average", labelNames, labelValues, dp.getAverage()));
+                    baseName + "_average", labelNames, labelValues, dp.getAverage(), timestamp));
         }
         if (dp.getExtendedStatistics() != null) {
+        	final Long tmstmp = timestamp;
             dp.getExtendedStatistics().forEach((key, value) -> extendedSamples
-                    .computeIfAbsent(key, k -> new ArrayList<>())
-                    .add(new Collector.MetricFamilySamples.Sample(
-                    baseName + "_" + Common.safeName(Common.toSnakeCase(key)), labelNames, labelValues, value)));
+                .computeIfAbsent(key, k -> new ArrayList<>())
+                .add(new Collector.MetricFamilySamples.Sample(
+                        baseName + "_" + Common.safeName(Common.toSnakeCase(key)), labelNames, labelValues, value, tmstmp)));
         }
     }
 
@@ -99,6 +110,8 @@ public class Samples {
         minimumSamples.addAll(samples.minimumSamples);
         maximumSamples.addAll(samples.maximumSamples);
         averageSamples.addAll(samples.averageSamples);
-        extendedSamples.putAll(samples.extendedSamples);
+        samples.extendedSamples.forEach((key, value) -> extendedSamples.merge(key, value,
+				(list1, list2) -> Stream.of(list1, list2).flatMap(Collection::stream).collect(Collectors.toList())));
+       
     }
 }

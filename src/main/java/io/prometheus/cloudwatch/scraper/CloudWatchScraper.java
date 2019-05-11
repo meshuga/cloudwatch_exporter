@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 
 public class CloudWatchScraper {
     private static final Counter cloudwatchRequests = Counter.build()
+            .labelNames("action", "namespace")
             .name("cloudwatch_requests_total").help("API requests made to CloudWatch").register();
 
     /**
@@ -77,7 +78,7 @@ public class CloudWatchScraper {
                 future.complete(sendMessageResult);
             }
         });
-        cloudwatchRequests.inc();
+        cloudwatchRequests.labels("listMetrics", rule.getAwsNamespace()).inc();
         return future.thenCompose(result -> {
             List<List<Dimension>> mappedResult = result.getMetrics()
                     .stream()
@@ -225,7 +226,7 @@ public class CloudWatchScraper {
                                             labelValues.add(d.getValue());
                                         }
 
-                                        return Optional.of(new Samples(baseName, dp, labelNames, labelValues));
+                                        return Optional.of(new Samples(baseName, dp, labelNames, labelValues, rule));
                                     })).toArray(CompletableFuture[]::new);
                     return CompletableFuture.allOf(futures)
                             .thenApply(v -> {
@@ -256,7 +257,8 @@ public class CloudWatchScraper {
                 future.complete(sendMessageResult);
             }
         });
-        cloudwatchRequests.inc();
+
+        cloudwatchRequests.labels("getMetricStatistics", request.getNamespace()).inc();
         return future;
     }
 }

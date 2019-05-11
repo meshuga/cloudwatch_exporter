@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -27,10 +28,10 @@ public class SamplesTest {
                 .withMinimum(3.)
                 .withMaximum(4.)
                 .withAverage(5.)
-                .addExtendedStatisticsEntry(fixtures.extendedEntry, 6.);
+                .addExtendedStatisticsEntry(fixtures.extendedEntry, 6.).withTimestamp(new Date());
 
         // WHEN
-        Samples sut = new Samples(fixtures.baseName, datapoint, fixtures.labelNames, fixtures.labelValues);
+        Samples sut = new Samples(fixtures.baseName, datapoint, fixtures.labelNames, fixtures.labelValues, fixtures.rule);
         List<Collector.MetricFamilySamples> metricFamilySamples = sut.partialMfs(fixtures.unit, fixtures.rule);
 
         // THEN
@@ -45,10 +46,10 @@ public class SamplesTest {
     @Test
     public void onNoDatapointDataShouldReturnNoMfs() throws Exception {
         // GIVEN
-        Datapoint datapoint = new Datapoint();
-
+        Datapoint datapoint = new Datapoint().withTimestamp(new Date());
+        
         // WHEN
-        Samples sut = new Samples(fixtures.baseName, datapoint, fixtures.labelNames, fixtures.labelValues);
+        Samples sut = new Samples(fixtures.baseName, datapoint, fixtures.labelNames, fixtures.labelValues, fixtures.rule);
         List<Collector.MetricFamilySamples> metricFamilySamples = sut.partialMfs(fixtures.unit, fixtures.rule);
 
         // THEN
@@ -59,8 +60,8 @@ public class SamplesTest {
     public void onAddingSampleShouldReturnCorrectData() throws Exception {
         // GIVEN
         Datapoint datapoint = new Datapoint()
-                .withSum(1.);
-        Samples initialSamples = new Samples(fixtures.baseName, datapoint, fixtures.labelNames, fixtures.labelValues);
+                .withSum(1.).withTimestamp(new Date());
+        Samples initialSamples = new Samples(fixtures.baseName, datapoint, fixtures.labelNames, fixtures.labelValues, fixtures.rule);
         Samples sut = new Samples(fixtures.baseName);
 
         // WHEN

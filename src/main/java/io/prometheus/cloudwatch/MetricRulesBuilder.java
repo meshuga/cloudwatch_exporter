@@ -20,6 +20,11 @@ public class MetricRulesBuilder {
             defaultDelay = ((Number) config.get("delay_seconds")).intValue();
         }
 
+        boolean defaultCloudwatchTimestamp = true;
+        if (config.containsKey("set_timestamp")) {
+            defaultCloudwatchTimestamp = (Boolean) config.get("set_timestamp");
+        }
+
         if (!config.containsKey("metrics")) {
             throw new IllegalArgumentException("Must provide metrics");
         }
@@ -73,6 +78,12 @@ public class MetricRulesBuilder {
             } else {
                 rule.setDelaySeconds(defaultDelay);
             }
+            if (yamlMetricRule.containsKey("set_timestamp")) {
+                rule.cloudwatchTimestamp = (Boolean) yamlMetricRule.get("set_timestamp");
+            } else {
+                rule.cloudwatchTimestamp = defaultCloudwatchTimestamp;
+            }
+
         }
 
         return rules;

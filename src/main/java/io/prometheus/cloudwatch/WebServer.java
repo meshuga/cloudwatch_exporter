@@ -2,12 +2,16 @@ package io.prometheus.cloudwatch;
 
 import io.prometheus.client.exporter.MetricsServlet;
 import io.prometheus.cloudwatch.servlet.DynamicReloadServlet;
+import io.prometheus.cloudwatch.servlet.HealthServlet;
 import io.prometheus.cloudwatch.servlet.HomePageServlet;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-
-import java.io.FileReader;
 
 public class WebServer {
 
@@ -31,6 +35,8 @@ public class WebServer {
         server.setHandler(context);
         context.addServlet(new ServletHolder(new MetricsServlet()), "/metrics");
         context.addServlet(new ServletHolder(new DynamicReloadServlet(collector)), "/-/reload");
+        context.addServlet(new ServletHolder(new HealthServlet()), "/-/healthy");
+        context.addServlet(new ServletHolder(new HealthServlet()), "/-/ready");
         context.addServlet(new ServletHolder(new HomePageServlet()), "/");
         server.start();
         server.join();

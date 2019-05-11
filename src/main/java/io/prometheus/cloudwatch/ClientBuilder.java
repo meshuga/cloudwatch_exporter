@@ -1,6 +1,7 @@
 package io.prometheus.cloudwatch;
 
 import com.amazonaws.auth.STSAssumeRoleSessionCredentialsProvider;
+import com.amazonaws.auth.SystemPropertiesCredentialsProvider;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.RegionUtils;
@@ -10,8 +11,11 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchAsyncClientBuilder;
 import io.prometheus.cloudwatch.scraper.Common;
 
 import java.util.Map;
+import java.util.Properties;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
+
+import java.util.Enumeration;
 
 public class ClientBuilder {
     private final AmazonCloudWatchAsync defaultClient;

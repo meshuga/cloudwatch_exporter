@@ -15,6 +15,7 @@ public class MetricRule {
     private Map<String, List<String>> awsDimensionSelect;
     private Map<String, List<String>> awsDimensionSelectRegex;
     private String help;
+    boolean cloudwatchTimestamp;
 
     public String getAwsNamespace() {
         return awsNamespace;
@@ -114,4 +115,9 @@ public class MetricRule {
         this.help = help;
         return this;
     }
+
+    public boolean isCloudwatchTimestamp() {
+        return cloudwatchTimestamp;
+    }
+
 }
